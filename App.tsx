@@ -1,9 +1,9 @@
-import React from 'react';
-import { View, Button, PermissionsAndroid, Platform } from 'react-native';
+import React, { useState } from 'react';
+import { View, Button, PermissionsAndroid, Platform,TextInput } from 'react-native';
 import notifee, { AndroidImportance } from '@notifee/react-native';
 
 export default function App() {
-
+const [text, setText] = useState('');
   async function requestPermission() {
     if (Platform.OS === 'android' && Platform.Version >= 33) {
       await PermissionsAndroid.request(
@@ -27,7 +27,7 @@ export default function App() {
     // mostrar notificacion
     await notifee.displayNotification({
       title: 'Notification heads-up',
-      body: 'This is a notification you received.',
+      body: text || 'You received a message',
       android: {
         channelId,
         pressAction: { id: 'default' },
@@ -38,6 +38,12 @@ export default function App() {
 
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <TextInput
+        style={{width: '80%', borderWidth: 1, borderColor: '#888', padding: 10, marginBottom: 16}}
+        placeholder="Type your message..."
+        value={text}
+        onChangeText={setText}
+        />
       <Button title="Enter notification" onPress={showHeadsUp} />
     </View>
   );
