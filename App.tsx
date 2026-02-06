@@ -1,45 +1,44 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React from 'react';
+import { View, Button, PermissionsAndroid, Platform } from 'react-native';
+import notifee, { AndroidImportance } from '@notifee/react-native';
 
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+export default function App() {
 
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
+  async function requestPermission() {
+    if (Platform.OS === 'android' && Platform.Version >= 33) {
+      await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+      );
+    }
+  }
+
+  async function showHeadsUp() {
+    await requestPermission();
+
+    // Crea un canal de notificación
+    const channelId = await notifee.createChannel({
+      id: 'default',
+      name: 'Default Channel',
+      importance: AndroidImportance.HIGH, 
+      sound: 'default',
+      vibration: true,
+    });
+
+    // mostrar notificacion
+    await notifee.displayNotification({
+      title: 'Notification heads-up',
+      body: 'This is a notification you received.',
+      android: {
+        channelId,
+        pressAction: { id: 'default' },
+        smallIcon: 'ic_launcher_round', 
+      },
+    });
+  }
 
   return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
-    </SafeAreaProvider>
-  );
-}
-
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
-
-  return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Button title="Enter notification" onPress={showHeadsUp} />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
-
-export default App;
